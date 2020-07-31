@@ -1,6 +1,6 @@
 {
   "name": "@ruyadorno/git-pr",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Interactive checkout PRs using the GitHub cli",
   "repository": "ruyadorno/ntl",
   "files": [
