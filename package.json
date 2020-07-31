@@ -1,0 +1,33 @@
+{
+  "name": "@ruyadorno/git-pr",
+  "version": "1.0.0",
+  "description": "Interactive checkout PRs using the GitHub cli",
+  "repository": "ruyadorno/ntl",
+  "files": [
+    "git-pr"
+  ],
+  "bin": {
+    "git-pr": "git-pr"
+  },
+  "keywords": [
+    "cli",
+    "github",
+    "gh",
+    "interactive",
+    "ipt",
+    "ipipeto",
+    "cli",
+    "interactive",
+    "git",
+    "inquirer",
+    "unix",
+    "terminal",
+    "workflow"
+  ],
+  "author": {
+    "name": "Ruy Adorno",
+    "twitter": "ruyadorno",
+    "url": "ruyadorno.com"
+  },
+  "license": "MIT"
+}

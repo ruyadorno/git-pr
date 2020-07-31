@@ -1,0 +1,147 @@
+#!/usr/bin/env bash
+
+function listandcheckout() {
+    local currentprref=$(gh pr list | ipt -u | cut -f 1 -d $'\t')
+    local forkdata=$(gh api graphql -F pr="$currentprref" -F owner=':owner' -F name=':repo' -f query='
+    query($name: String!, $owner: String!, $pr: Int!) {
+        repository(owner: $owner, name: $name) {
+            pullRequest(number: $pr) {
+                headRepository { sshUrl },
+                headRefName
+            }
+        }
+    }')
+    local forkref="$(echo $forkdata | json data.repository.pullRequest.headRepository.sshUrl)"
+    local branchref="$(echo $forkdata | json data.repository.pullRequest.headRefName)"
+    local remoteref="fork-$currentprref"
+
+    if [ "$forkref" == "" ] || \
+       [ "$remoteref" == "" ] || \
+       [ "$branchref" == "" ]; then
+      cat >&2 <<MSG
+Oops, something went wrong... aborting.
+MSG
+      exit 1
+    fi
+
+    git remote add $remoteref $forkref
+    git fetch $remoteref $branchref
+    git switch -c $branchref -t $remoteref/$branchref
+}
+
+function pushtoforkref() {
+    local gitinfo="$(git rev-parse --abbrev-ref @{upstream})"
+    local forkref="$(echo "$gitinfo" | cut -f 1 -d '/')"
+    local branchref="$(echo "$gitinfo" | sed "s#$forkref/##")"
+
+    if [ "$forkref" == "" ] || \
+       [ "$branchref" == "" ]; then
+      cat >&2 <<MSG
+Missing fork and/or branch reference, aborting.
+MSG
+      exit 1
+    fi
+
+    git push $forkref $branchref
+}
+
+function cleanupafterpush() {
+    local currentbranch="$(git rev-parse --abbrev-ref HEAD)"
+    local defaultbranch="$(git config --get init.defaultBranch || echo 'master')"
+    local gitinfo="$(git rev-parse --abbrev-ref @{upstream})"
+    local forkref="$(echo "$gitinfo" | cut -f 1 -d '/')"
+    local branchref="$(echo "$gitinfo" | sed "s#$forkref/##")"
+
+    if [ "$currentbranch" == "master" ] || \
+       [ "$currentbranch" == "$defaultbranch" ]; then
+      cat >&2 <<MSG
+Oops, looks like you're not on the PR branch anymore, aborting.
+MSG
+      exit 1
+    fi
+
+    if [ "$forkref" == "" ]; then
+      cat >&2 <<MSG
+Missing fork reference, could not clean up remote.
+MSG
+    fi
+
+    git remote remove $forkref
+
+    if [ "$branchref" == "" ]; then
+      cat >&2 <<MSG
+Missing branch reference, could not clean up checked out branch.
+MSG
+    fi
+
+    git checkout $defaultbranch
+    git branch -D $branchref
+}
+
+case $1 in
+  version|--version|-v)
+    echo "1.0.0"
+    ;;
+  help|--help|-h)
+    cat <<EOF
+Usage:
+    git pr
+    git pr [<cmd>]
+
+Commands:
+git pr              Checkout from an interactive list of all open PRs
+git pr clean        Cleans up after checking out a branch from a fork
+git pr close        Closes the PR selected from the interactive list
+git pr diff         See diff for the selected PR from an interactive list
+git pr help         Shows this help message
+git pr list         Only lists the current open PRs
+git pr merge        Merges the selected PR
+git pr push         Push commits to the branch of prev selected PR
+git pr reopen       Reopens the selected closed PR
+git pr review       Review the selected PR from the cli
+git pr status       Status of all open PRs
+git pr version      Shows current version number
+git pr view         See info for the selected PR
+
+Requirements:
+This tool requires the following cli to be available in your system:
+- GitHub cli (https://github.com/cli/cli#installation)
+- json [npm i -g json](https://www.npmjs.com/package/json)
+- ipt [npm i -g ipt](https://www.npmjs.com/package/ipt)
+EOF
+    ;;
+  clean)
+    cleanupafterpush
+    ;;
+  close)
+    gh pr list | ipt -u | cut -f 1 -d $'\t' | xargs gh pr close
+    ;;
+  diff)
+    gh pr list | ipt -u | cut -f 1 -d $'\t' | xargs gh pr diff
+    ;;
+  list)
+    gh pr list
+    ;;
+  merge)
+    gh pr list | ipt -u | cut -f 1 -d $'\t' | xargs gh pr merge --squash
+    ;;
+  push)
+    pushtoforkref
+    ;;
+  status)
+    gh pr status
+    ;;
+  reopen)
+    gh pr list -s closed | ipt -u | cut -f 1 -d $'\t' | xargs gh pr reopen
+    ;;
+  review)
+    gh pr review $(gh pr list | ipt -u | cut -f 1 -d $'\t')
+    ;;
+  view)
+    gh pr list | ipt -u | cut -f 1 -d $'\t' | xargs gh pr view
+    ;;
+  * )
+    listandcheckout
+    ;;
+esac
+
