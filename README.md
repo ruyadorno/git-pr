@@ -23,8 +23,10 @@ Git plugin that allows you to interactively list open PRs from a GitHub repo and
 Get it with **npm**:
 
 ```sh
-npm install -g @ruyadorno/git-pr
+npm install -g @ruyadorno/git-pr ipt json
 ```
+
+\*Also needs the [GitHub cli installed in your system](https://github.com/cli/cli#installation)
 
 ### Run
 
