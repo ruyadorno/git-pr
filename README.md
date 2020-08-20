@@ -68,19 +68,19 @@ Usage:
     git pr [<cmd>]
 
 Commands:
-git pr              Checkout from an interactive list of all open PRs
-git pr clean        Cleans up after checking out a branch from a fork
-git pr close        Closes the PR selected from the interactive list
-git pr diff         See diff for the selected PR from an interactive list
-git pr help         Shows this help message
-git pr list         Only lists the current open PRs
-git pr merge        Merges the selected PR
-git pr push         Push commits to the branch of prev selected PR
-git pr reopen       Reopens the selected closed PR
-git pr review       Review the selected PR from the cli
-git pr status       Status of all open PRs
-git pr version      Shows current version number
-git pr view         See info for the selected PR
+git pr                  Checkout from an interactive list of all open PRs
+git pr clean            Cleans up after checking out a branch from a fork
+git pr close            Closes the PR selected from the interactive list
+git pr diff             See diff for the selected PR from an interactive list
+git pr help             Shows this help message
+git pr list             Only lists the current open PRs
+git pr merge            Merges the selected PR
+git pr push [--force]   Push commits to the branch of prev selected PR
+git pr reopen           Reopens the selected closed PR
+git pr review           Review the selected PR from the cli
+git pr status           Status of all open PRs
+git pr version          Shows current version number
+git pr view             See info for the selected PR
 
 Requirements:
 This tool requires the following cli to be available in your system:

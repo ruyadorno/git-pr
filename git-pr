@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+GHPR_PREFIX="githubpr/"
+
 function listandcheckout() {
     local currentprref=$(gh pr list | ipt -u | cut -f 1 -d $'\t')
     local forkdata=$(gh api graphql -F pr="$currentprref" -F owner=':owner' -F name=':repo' -f query='
@@ -26,7 +28,7 @@ MSG
 
     git remote add $remoteref $forkref
     git fetch $remoteref $branchref
-    git switch -c $branchref -t $remoteref/$branchref
+    git switch -c "$GHPR_PREFIX$branchref" -t $remoteref/$branchref
 }
 
 function pushtoforkref() {
@@ -42,7 +44,7 @@ MSG
       exit 1
     fi
 
-    git push $forkref $branchref
+    git push $forkref "$GHPR_PREFIX$branchref:$branchref" $1
 }
 
 function cleanupafterpush() {
@@ -75,12 +77,12 @@ MSG
     fi
 
     git checkout $defaultbranch
-    git branch -D $branchref
+    git branch -D "$GHPR_PREFIX$branchref"
 }
 
 case $1 in
   version|--version|-v)
-    echo "1.0.1"
+    echo "1.1.0"
     ;;
   help|--help|-h)
     cat <<EOF
@@ -89,19 +91,19 @@ Usage:
     git pr [<cmd>]
 
 Commands:
-git pr              Checkout from an interactive list of all open PRs
-git pr clean        Cleans up after checking out a branch from a fork
-git pr close        Closes the PR selected from the interactive list
-git pr diff         See diff for the selected PR from an interactive list
-git pr help         Shows this help message
-git pr list         Only lists the current open PRs
-git pr merge        Merges the selected PR
-git pr push         Push commits to the branch of prev selected PR
-git pr reopen       Reopens the selected closed PR
-git pr review       Review the selected PR from the cli
-git pr status       Status of all open PRs
-git pr version      Shows current version number
-git pr view         See info for the selected PR
+git pr                  Checkout from an interactive list of all open PRs
+git pr clean            Cleans up after checking out a branch from a fork
+git pr close            Closes the PR selected from the interactive list
+git pr diff             See diff for the selected PR from an interactive list
+git pr help             Shows this help message
+git pr list             Only lists the current open PRs
+git pr merge            Merges the selected PR
+git pr push [--force]   Push commits to the branch of prev selected PR
+git pr reopen           Reopens the selected closed PR
+git pr review           Review the selected PR from the cli
+git pr status           Status of all open PRs
+git pr version          Shows current version number
+git pr view             See info for the selected PR
 
 Requirements:
 This tool requires the following cli to be available in your system:
@@ -126,7 +128,7 @@ EOF
     gh pr list | ipt -u | cut -f 1 -d $'\t' | xargs gh pr merge --squash
     ;;
   push)
-    pushtoforkref
+    pushtoforkref $2
     ;;
   status)
     gh pr status
