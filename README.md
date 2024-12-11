@@ -57,8 +57,8 @@ npx @ruyadorno/git-pr
 ## Requirements
 
 - [GitHub cli](https://github.com/cli/cli#installation)
-- `json` [npm i -g json](https://www.npmjs.com/package/json)
 - `ipt` [npm i -g ipt](https://www.npmjs.com/package/ipt)
+- [`jq`](https://jqlang.github.io/jq/) OR `json` [npm i -g json](https://www.npmjs.com/package/json) for JSON parsing
 
 ## Help
 
@@ -85,8 +85,8 @@ git pr view             See info for the selected PR
 Requirements:
 This tool requires the following cli to be available in your system:
 - GitHub cli (https://github.com/cli/cli#installation)
-- json [npm i -g json](https://www.npmjs.com/package/json)
 - ipt [npm i -g ipt](https://www.npmjs.com/package/ipt)
+- [jq](https://jqlang.github.io/jq/) OR json [npm i -g json](https://www.npmjs.com/package/json)
 ```
 
 ### Equivalent bash alias
@@ -99,4 +99,4 @@ alias git-pr="gh pr list | ipt -u | cut -f 3 -d $'\t' | xargs gh pr checkout"
 
 ## License
 
-[MIT](LICENSE) © 2020 [Ruy Adorno](https://ruyadorno.com)
+[MIT](LICENSE) © 2024 [Ruy Adorno](https://ruyadorno.com)

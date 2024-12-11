@@ -2,6 +2,19 @@
 
 GHPR_PREFIX="githubpr/"
 
+function parsejson() {
+	if hash json 2>/dev/null; then
+    echo $(json "data$1")
+	elif hash jq 2>/dev/null; then
+    echo $(jq -r ".data | $1")
+	else
+      cat >&2 <<MSG
+Missing a json parser, please install either 'json' or 'jq'.
+MSG
+      exit 1
+	fi
+}
+
 function listandcheckout() {
     local currentprref=$(gh pr list | ipt -u | cut -f 1 -d $'\t')
     local forkdata=$(gh api graphql -F pr="$currentprref" -F owner=':owner' -F name=':repo' -f query='
@@ -13,8 +26,8 @@ function listandcheckout() {
             }
         }
     }')
-    local forkref="$(echo $forkdata | json data.repository.pullRequest.headRepository.sshUrl)"
-    local branchref="$(echo $forkdata | json data.repository.pullRequest.headRefName)"
+    local forkref="$(echo $forkdata | parsejson '.repository.pullRequest.headRepository.sshUrl')"
+    local branchref="$(echo $forkdata | parsejson '.repository.pullRequest.headRefName')"
     local remoteref="fork-$currentprref"
 
     if [ "$forkref" == "" ] || \
@@ -108,8 +121,8 @@ git pr view             See info for the selected PR
 Requirements:
 This tool requires the following cli to be available in your system:
 - GitHub cli (https://github.com/cli/cli#installation)
-- json [npm i -g json](https://www.npmjs.com/package/json)
 - ipt [npm i -g ipt](https://www.npmjs.com/package/ipt)
+- [jq](https://jqlang.github.io/jq/) OR json [npm i -g json](https://www.npmjs.com/package/json) for JSON parsing
 EOF
     ;;
   clean)
