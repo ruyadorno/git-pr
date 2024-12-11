@@ -62,12 +62,13 @@ MSG
 
 function cleanupafterpush() {
     local currentbranch="$(git rev-parse --abbrev-ref HEAD)"
-    local defaultbranch="$(git config --get init.defaultBranch || echo 'master')"
+    local defaultbranch="$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')"
     local gitinfo="$(git rev-parse --abbrev-ref @{upstream})"
     local forkref="$(echo "$gitinfo" | cut -f 1 -d '/')"
     local branchref="$(echo "$gitinfo" | sed "s#$forkref/##")"
 
     if [ "$currentbranch" == "master" ] || \
+       [ "$currentbranch" == "main" ] || \
        [ "$currentbranch" == "$defaultbranch" ]; then
       cat >&2 <<MSG
 Oops, looks like you're not on the PR branch anymore, aborting.
